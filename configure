@@ -14,13 +14,12 @@ usage() {
 Configures simultaneous AP and Managed Mode Wifi on Raspberry Pi
 
 USAGE:
-    rpi-wifi -a <ap_ssid> [<ap_password>] -c <client_password> [<client_password>]
+    rpi-wifi -a <ap_ssid> [<ap_password>]
     
-    rpi-wifi -a MyAP myappass -c MyWifiSSID mywifipass
+    rpi-wifi -a MyAP myappass
 
 PARAMETERS:
     -a, --ap      	AP SSID & password
-    -c, --client	Client SSID & password
     -i, --ip            AP IP
 
 FLAGS:
@@ -35,14 +34,7 @@ while [[ $# -gt 0 ]]
 do
 key="$1"
 
-case $key in
-    -c|--client)
-    CLIENT_SSID="$2"
-    CLIENT_PASSPHRASE="$3"
-    shift
-    shift
-    shift
-    ;;
+case $key in    
     -a|--ap)
     AP_SSID="$2"
     AP_PASSPHRASE="$3"
@@ -120,19 +112,6 @@ EOF
 # Populate `/etc/default/hostapd`
 sudo bash -c 'cat > /etc/default/hostapd' << EOF
 DAEMON_CONF="/etc/hostapd/hostapd.conf"
-EOF
-
-# Populate `/etc/wpa_supplicant/wpa_supplicant.conf`
-sudo bash -c 'cat > /etc/wpa_supplicant/wpa_supplicant.conf' << EOF
-country=GB
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-
-network={
-    ssid="${CLIENT_SSID}"
-    $([ $CLIENT_PASSPHRASE ] && echo "psk=\"${CLIENT_PASSPHRASE}\"")
-    id_str="AP1"
-}
 EOF
 
 # Populate `/etc/network/interfaces`
